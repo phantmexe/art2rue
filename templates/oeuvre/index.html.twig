@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Œuvres{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-white">Liste des Œuvres</h1>
+            <a href="{{ path('app_oeuvre_new') }}" class="btn btn-primary">Créer une nouvelle œuvre</a>
+        </div>
+
+        <div class="row">
+            {% for oeuvre in oeuvres %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {# Affichage de l'image depuis public/uploads/photos/ #}
+                        {% if oeuvre.nomFichier and oeuvre.nomFichier != '' %}
+                            <img src="{{ asset('uploads/photos/' ~ oeuvre.nomFichier) }}" class="card-img-top" alt="{{ oeuvre.titre }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <span>Aucune image</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ oeuvre.titre }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">📍 {{ oeuvre.lieu }}</h6>
+
+                            <p class="card-text text-muted small mb-2">{{ oeuvre.description }}</p>
+
+                            <ul class="list-unstyled small mb-3">
+                                <li><strong>Création :</strong> {{ oeuvre.dateCreation ? oeuvre.dateCreation|date('d/m/Y') : 'Non renseignée' }}</li>
+                                <li><strong>Statut :</strong>
+                                    {% if oeuvre.estDetruite %}
+                                        <span class="badge bg-danger">Détruite</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Intacte</span>
+                                    {% endif %}
+                                </li>
+                            </ul>
+
+                            {# Affichage des techniques #}
+                            {% if oeuvre.techniques|length > 0 %}
+                                <div class="mb-3">
+                                    {% for technique in oeuvre.techniques %}
+                                        <span class="badge bg-info text-dark me-1">{{ technique.nom }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="{{ path('app_oeuvre_show', {'id': oeuvre.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
+                                    <a href="{{ path('app_oeuvre_edit', {'id': oeuvre.id}) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-warning text-center" role="alert">
+                        Aucune œuvre n'a encore été enregistrée.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

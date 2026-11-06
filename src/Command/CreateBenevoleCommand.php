@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Command;
 
 use App\Entity\Benevole;
@@ -13,22 +12,26 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
     name: 'app:create-benevole',
-    description: 'Crée un bénévole de test pour la connexion.',
+    description: 'Crée ou met à jour le bénévole de test.',
 )]
 class CreateBenevoleCommand extends Command
 {
     public function __construct(
-        private EntityManagerInterface      $entityManager,
+        private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher
-    )
-    {
+    ) {
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $benevole = new Benevole();
-        $benevole->setEmail('joleron@art2rue.fr');
+        $benevole = $this->entityManager->getRepository(Benevole::class)->findOneBy(['email' => 'joleron@art2rue.fr']);
+
+        if (!$benevole) {
+            $benevole = new Benevole();
+            $benevole->setEmail('joleron@art2rue.fr');
+            $benevole->setRoles(['ROLE_USER']);
+        }
 
         $hashedPassword = $this->passwordHasher->hashPassword(
             $benevole,
@@ -36,14 +39,10 @@ class CreateBenevoleCommand extends Command
         );
         $benevole->setPassword($hashedPassword);
 
-        if (method_exists($benevole, 'setRoles')) {
-            $benevole->setRoles(['ROLE_USER']);
-        }
-
         $this->entityManager->persist($benevole);
         $this->entityManager->flush();
 
-        $output->writeln('<info>Bénévole créé avec succès !</info>');
+        $output->writeln('<info>Bénévole joleron@art2rue.fr configuré avec succès !</info>');
 
         return Command::SUCCESS;
     }
